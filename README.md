@@ -25,6 +25,10 @@ see [Getting started with Elasticsearch in Python](https://towardsdatascience.co
 ### Based on the keywords, identify the top 20 relevant keywords that categorizes that transcript.
 It should account for factors such as uniqueness of word, frequency and relevance in the transcript
 
+#### Tokenizing & Stop word & Stemming
+
+#### Topic modeling using Latent Dirichlet Allocation
+
 
 ### Use these keywords and relevance of other words in the vicinity to create
 clusters of moments from the transcript that can be called the important highlights of the discussion
