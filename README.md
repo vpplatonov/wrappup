@@ -27,8 +27,57 @@ It should account for factors such as uniqueness of word, frequency and relevanc
 
 #### Tokenizing & Stop word & Stemming
 
+#### Extracting the frequency of terms using a Bag of Words model
+```
+Vocabulary:
+ ['building' 'computervision' 'end' 'even' 'find' 'ideas' 'interesting'
+ 'll' 'think' 'work']
+
+Document term matrix:
+
+         Word     Chunk-1     Chunk-2
+
+    building           2           1
+computervision           1           1
+         end           1           1
+        even           1           1
+        find           3           1
+       ideas           6           1
+ interesting           2           1
+          ll           2           1
+       think           3           1
+        work           2           1
+```
+
 #### Topic modeling using Latent Dirichlet Allocation
 
+```
+Top 10 contributing words to each topic:
+
+Topic 0
+"idea" ==> 2.7%
+"els" ==> 1.6%
+"find" ==> 1.6%
+"mani" ==> 1.6%
+"resid" ==> 1.6%
+"incept" ==> 1.6%
+"way" ==> 1.6%
+"make" ==> 1.6%
+"appl" ==> 1.6%
+"across" ==> 1.6%
+
+Topic 1
+"network" ==> 3.4%
+"see" ==> 2.2%
+"effect" ==> 1.9%
+"well" ==> 1.9%
+"might" ==> 1.6%
+"comput" ==> 1.6%
+"vision" ==> 1.6%
+"work" ==> 1.6%
+"idea" ==> 1.6%
+"paper" ==> 1.3%
+```
 
 ### Use these keywords and relevance of other words in the vicinity to create
 clusters of moments from the transcript that can be called the important highlights of the discussion
