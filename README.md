@@ -3,6 +3,7 @@
 ### Take any podcast from youtube, run it through a publicly available speech to text engine.
 
 video [C4W2L01 Why look at case studies?](https://www.youtube.com/watch?v=-bvTzZCEOdM&list=PLkDaE6sCZn6Gl29AoE31iwdVwSG-KnDzF&index=12)
+
 put your .WAV or .MP4 file on S3 bucket
 
 ### Set up an elastic search client and store the transcript on the elastic search index.
@@ -21,6 +22,36 @@ see [Getting started with Elasticsearch in Python](https://towardsdatascience.co
 
 ```
 (.nlpenv) $ pip3 install elasticsearch
+```
+
+result
+```
+{
+    "_index": "podcast",
+    "_type": "records",
+    "_id": "B-cA_mUBn9pTplpGA7is",
+    "_score": 1,
+    "_source": {
+        "jobName": "Andrew-Ng-Lecture-Transcribe",
+        "accountId": "888736911809",
+        "results": {
+            "transcripts": [
+                {
+                    "transcript": "Hello and welcome back this week the first thing we'll do is show you a number of case studies of effective convolution all your networks so why look a case studies last week to learn about the basic building plots such as accomplished all layers proving this and fully connected layers of confidence it turns out along the past few years of computer vision research has been on hard to put together these basic building blocks to form effective convolution your networks and one of the best ways for use again intuition yourself is to see some of these examples i think just as many of you might have learned to write code by reading other people's code, i think that the good way to get intuition hard bill confidence is the weed or to see other examples of effective confidence and it turns out that a net new network architecture there works well on one computer vision toss often worlds well on other tacis well stations, maybe on your toss. So if someone else's train in your network has always figured out and you're in the calm protector there's very good at recognizing cats and dogs and people but you have a different computer vision task that maybe your trumpet also driving home you might well be able to take someone. Else's knew that to aguatecture and apply that to your problem. And finally, after the next few videos, you be able to read some of the research papers from the future of computer vision and i hope that you might find it satisfying as well you don't have to do this is klaus we hoped you might find it satisfying to read you know some of these seminal computervision research paper and see yourself able to understand so that let's get started as an outline for what we do in the next few videos we'll first show you a few classic networks so the net five network which came from because in nineteen eighties alice net which is often cited in the v gina at work and these are examples of pretty effective new networks and some of the ideas later foundation for modern come on division and you see ideas in these papers they're probably useful for your own and you see ideas from these papers that will probably be useful for your own work as well then want want to show you the resident or called residual network and you might have heard that new and that's where is getting deeper and deeper the rest net new and that's where train's a very very deep one hundred fifty two layer and your network then has some very interesting tricks interesting ideas how to do that effect of the on dh then finally also see a case study of thie inception your network after seeing these your networks i think you have much better intuition about how to build effective convolution you're in that world and even if you end up not working, computer vision yourself, i can. You find a lot of the ideas from some music's apples, such as residents, inception, that's, where many of these ideas across fertilizing are making their way in tow. Other disciplines, even if you don't end up building computervision africans yourself, i think you'll find some of these ideas very interesting and helpful for your work."
+                }
+            ],
+            "items": [
+                {
+                    "start_time": "0.225",
+                    "end_time": "0.705",
+                    "alternatives": [
+                        {
+                            "confidence": "0.7869",
+                            "content": "Hello"
+                        }
+                    ],
+                    "type": "pronunciation"
+                },
 ```
 
 ### Based on the keywords, identify the top 20 relevant keywords that categorizes that transcript.
