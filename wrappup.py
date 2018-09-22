@@ -1,7 +1,11 @@
 """
-    Take any podcast from youtube,
+    1. Take any podcast from youtube,
     run it through a publicly available speech to text engine (Amazon Transcribe / Google Speech-to-Text / Sphinx).
     and store the transcript on the elastic search index.
+
+    2. Identify the top 20 relevant keywords that categorizes that transcript.
+    (uniqueness of word, frequency and relevance)
+
     (c) Platonov Valerii 09.2018 v0.1
 """
 
@@ -11,15 +15,13 @@ import json
 from .elasticsearch.es_index import (
     connect_elasticsearch,
     create_index_aws,
-    aws_parse_json,
     store_record
 )
 from .transcribe.transcribe_job import (
     transcribe_start_job,
     job_name,
     job_uri,
-    aws_get_answer,
-    aws_object_hook
+    aws_get_answer
 )
 from .transcribe.transcribe_upload import (
     s3_upload
@@ -49,10 +51,11 @@ if __name__ == '__main__':
     # Convert or not to object
     # transcribeJSON = aws_parse_json(transcribeJSON)
 
-    # Save your job on ES index
+    # Save your job to ES index
     store_record(es_obj, transcribeJSON)
 
     ''' Part 2 Vocabulary (uniqueness of word, frequency and relevance) '''
+    # text = read_record(es_obj, 0)
 
 
 

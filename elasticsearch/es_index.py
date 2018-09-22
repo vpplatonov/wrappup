@@ -1,5 +1,5 @@
 """
-    Create Elastic Search Index according to AWS Transcript format
+    Create Elastic Search Index according to AWS Transcribe format
     {
       "jobName":"job ID",
       "accountId":"account ID",
@@ -57,12 +57,41 @@ def aws_parse_json(transcribe_json):
     return transcribe
 
 
+def search(es_object, search_object, index_name='podcast'):
+    """ Common search API """
+    search_res = es_object.search(index=index_name, body=search_object)
+
+    return search_res
+
+
+def read_record(elastic_object):
+    search_object = {'query': {
+        "ids" : {
+            "type" : "_doc",
+            "values" : {"wildcard": '*'}
+        }
+    }}
+    ids = search(elastic_object, json.dumps(search_object))
+
+    return ids
+
+
 def store_record(elastic_object, record, index_name='podcast'):
     try:
         outcome = elastic_object.index(index=index_name, doc_type='records', body=record)
     except Exception as ex:
         print('Error in indexing data')
         print(str(ex))
+
+
+def read_transcript_from_file():
+    _es = connect_elasticsearch()
+    create_index_aws(_es)
+
+    with open(File, 'rb') as fl:
+        tscribe_json = json.load(fl)
+
+    return tscribe_json['results']['transcripts'][0]['transcript']
 
 
 def create_index_aws(es_object, index_name='podcast'):
@@ -151,4 +180,8 @@ if __name__ == '__main__':
         transcribeJSON = json.load(f)
 
     # Save your job on ES index
-    store_record(es_obj, transcribeJSON)
+    # store_record(es_obj, transcribeJSON)
+
+    # res = read_record(es_obj, 0)
+    res = transcribeJSON['results']['transcripts'][0]['transcript']
+    print(res)
