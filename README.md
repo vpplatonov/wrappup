@@ -2,6 +2,7 @@
 
 ### Take any podcast from youtube, run it through a publicly available speech to text engine.
 
+video [C4W2L01 Why look at case studies?](https://www.youtube.com/watch?v=-bvTzZCEOdM&list=PLkDaE6sCZn6Gl29AoE31iwdVwSG-KnDzF&index=12)
 put your .WAV or .MP4 file on S3 bucket
 
 ### Set up an elastic search client and store the transcript on the elastic search index.
