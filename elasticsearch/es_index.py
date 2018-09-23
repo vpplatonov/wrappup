@@ -17,7 +17,7 @@
                "alternatives":[
                   {
                      "confidence":0.84,
-                     "word":"that's"
+                     "content":"that's"
                   }
                ]
             },
@@ -64,16 +64,58 @@ def search(es_object, search_object, index_name='podcast'):
     return search_res
 
 
-def read_record(elastic_object):
-    search_object = {'query': {
-        "ids" : {
-            "type" : "_doc",
-            "values" : {"wildcard": '*'}
+def read_record(elastic_object, index=0, search_str="Hello"):
+    search_object = [
+    {"query": {
+        "match": {"accountId": "888736911809"}
+      }
+    },
+    {"query": {
+        "nested" : {
+            "path": "results",
+            "query": {
+                "nested" : {
+                    "path": "results.transcripts",
+                    "query": {
+                      "bool": {
+                        "must": {
+                            "match" : {"results.transcripts.transcript" : search_str}
+                        }
+                      }
+                    }
+                }
+            }
+        }
+    }},
+    {"query": {
+        "nested" : {
+            "path": "results",
+            "query": {
+                "nested" : {
+                    "path": "results.items",
+                    "query":{
+                        "nested" : {
+                            "path": "results.items.alternatives",
+                            "filter": {
+                              "bool": {
+                                "must": {
+                                    "match" : {"results.items.alternatives.content" : search_str}
+                                }
+                              }
+                            }
+                        }
+                    }
+
+                }
+            }
         }
     }}
-    ids = search(elastic_object, json.dumps(search_object))
+    ]
+    ids = search(elastic_object, search_object[index])
+    # ids = search(elastic_object, json.dumps(search_object))
 
-    return ids
+    # return ids['hits']['hits'][0]['_source']['results']['transcripts'][0]['transcript']
+    return ids['hits']['hits'][0]['_source']['results']['items']
 
 
 def store_record(elastic_object, record, index_name='podcast'):
@@ -125,26 +167,24 @@ def create_index_aws(es_object, index_name='podcast'):
                             },
                             "items": {
                                 "type": "nested",
+                                "dynamic": "true",
                                 "properties": {
                                     "start_time": {
-                                        "type": "text"
+                                        "type": "float"
                                     },
                                     "end_time": {
-                                        "type": "text"
+                                        "type": "float"
                                     },
                                     "alternatives": {
                                         "type": "nested",
                                         "properties": {
                                             "confidence": {
-                                                "type": "text"
+                                                "type": "float"
                                             },
                                             "content": {
                                                 "type": "text"
                                             },
                                         },
-                                    },
-                                    "type": {
-                                        "type": "text"
                                     }
                                 }
                             },
@@ -174,14 +214,16 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.ERROR)
 
     es_obj = connect_elasticsearch()
-    create_index_aws(es_obj)
-
-    with open(File, 'rb') as f:
-        transcribeJSON = json.load(f)
-
-    # Save your job on ES index
+    # create_index_aws(es_obj)
+    #
+    # with open(File, 'rb') as f:
+    #     transcribeJSON = json.load(f)
+    #
+    # # Save your job on ES index
     # store_record(es_obj, transcribeJSON)
 
-    # res = read_record(es_obj, 0)
-    res = transcribeJSON['results']['transcripts'][0]['transcript']
+    search_str = "Hello"
+
+    res = read_record(es_obj, 2, search_str)
+    # res = transcribeJSON['results']['transcripts'][0]['transcript']
     print(res)
