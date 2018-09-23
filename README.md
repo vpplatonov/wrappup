@@ -5,6 +5,9 @@
 video [C4W2L01 Why look at case studies?](https://www.youtube.com/watch?v=-bvTzZCEOdM&list=PLkDaE6sCZn6Gl29AoE31iwdVwSG-KnDzF&index=12)
 
 put your .WAV or .MP4 file on S3 bucket
+```
+$ python3 ./transcribe/transcribe_upload
+```
 
 ### Set up an elastic search client and store the transcript on the elastic search index.
 
@@ -56,6 +59,11 @@ result
 
 ### Based on the keywords, identify the top 20 relevant keywords that categorizes that transcript.
 It should account for factors such as uniqueness of word, frequency and relevance in the transcript
+
+#### Download dataset for training
+```
+$ python3 dataset.py
+```
 
 #### Tokenizing & Stop word & Stemming
 
@@ -111,9 +119,9 @@ Topic 1
 "paper" ==> 1.3%
 ```
 
-### Use these keywords and relevance of other words in the vicinity to create
-clusters of moments from the transcript that can be called the important highlights of the discussion
-with their corresponding timestamps (start & stop time)
+### Use these keywords and relevance of other words
+in the vicinity to create clusters of moments from the transcript that can be called
+the important highlights of the discussion with their corresponding timestamps (start & stop time)
 
 
 ### The audio should also have the ability to be searched from the data stored in the elastic search index.

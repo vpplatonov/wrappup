@@ -79,7 +79,7 @@ def process(input_text):
     tokens = tokenizer.tokenize(input_text.lower())
 
     # Create a Snowball stemmer
-    stemmer = SnowballStemmer('english')
+    stemmer = SnowballStemmer('english', ignore_stopwords=True)
 
     tokens = remove_stop_words(tokens)
 
@@ -116,16 +116,22 @@ def lda_contributing_words(input_text, num_topics=2, num_words=10, passes=25):
                                         num_topics=num_topics, id2word=dict_tokens, passes=passes)
 
     print('\nTop ' + str(num_words) + ' contributing words to each topic:')
+    topics = []
     for item in ldamodel.print_topics(num_topics=num_topics,
                                       num_words=num_words):
         print('\nTopic', item[0])
         # Print the contributing words along with their relative contributions
 
         list_of_strings = item[1].split(' + ')
+        topic = []
         for text in list_of_strings:
             weight = text.split('*')[0]
             word = text.split('*')[1]
+            topic.append(word.replace('"', ''))
             print(word, '==>', str(round(float(weight) * 100, 2)) + '%')
+        topics.append(' '.join(topic))
+
+    return topics
 
 
 def bag_words_model(input_text):
@@ -178,6 +184,7 @@ if __name__ == '__main__':
     bag_words_model(input_text)
 
     # Topic modeling using Latent Dirichlet Allocation
-    lda_contributing_words(input_text)
+    topics = lda_contributing_words(input_text)
+    print(topics)
 
 
