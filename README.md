@@ -123,6 +123,12 @@ Topic 1
 in the vicinity to create clusters of moments from the transcript that can be called
 the important highlights of the discussion with their corresponding timestamps (start & stop time)
 
+best time for topic ( 30 sec speech )
+```
+{'start_time': 32.945, 'end_time': 63.325, 'alternatives': [{'confidence': '1.0000', 'content': 'net'}], 'type': 'pronunciation', 'nb': 10}
+{'start_time': 36.155, 'end_time': 66.41499999999999, 'alternatives': [{'confidence': '0.8804', 'content': 'vision'}], 'type': 'pronunciation', 'nb': 14}
+
+```
 
 ### The audio should also have the ability to be searched from the data stored in the elastic search index.
 If you can make the search understand intent of the query, for eg “Tell me something about marketing in this conversation”,

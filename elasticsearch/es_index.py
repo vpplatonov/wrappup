@@ -31,6 +31,64 @@ import json
 from elasticsearch import Elasticsearch
 import logging
 
+WrappupStructure = {
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+    },
+    "mappings": {
+        "items": {
+            "dynamic": "true",
+            "properties": {
+                "start_time": {
+                    "type": "float"
+                },
+                "end_time": {
+                    "type": "float"
+                },
+                "alternatives": {
+                    "type": "nested",
+                    "properties": {
+                        "confidence": {
+                            "type": "float"
+                        },
+                        "content": {
+                            "type": "text"
+                        },
+                    },
+                }
+            }
+        },
+    },
+    # "mappings": {
+    #     "transcripts": {
+    #         "dynamic": "strict",
+    #         "properties": {
+    #             "transcript": {
+    #                 "type": "text"
+    #             }
+    #         }
+    #     },
+    # },
+    # "mappings": {
+    #     "records": {
+    #         "dynamic": "strict",
+    #         "properties": {
+    #             "jobName": {
+    #                 "type": "text"
+    #             },
+    #             "accountId": {
+    #                 "type": "text"
+    #             },
+    #             "status": {
+    #                 "type": "text"
+    #             },
+    #         }
+    #     }
+    # }
+}
+
+
 # import json
 # from time import sleep
 # import requests
@@ -64,63 +122,9 @@ def search(es_object, search_object, index_name='podcast'):
     return search_res
 
 
-def read_record(elastic_object, index=0, search_str="Hello"):
-    search_object = [
-    {"query": {
-        "match": {"accountId": "888736911809"}
-      }
-    },
-    {"query": {
-        "nested" : {
-            "path": "results",
-            "query": {
-                "nested" : {
-                    "path": "results.transcripts",
-                    "query": {
-                      "bool": {
-                        "must": {
-                            "match" : {"results.transcripts.transcript" : search_str}
-                        }
-                      }
-                    }
-                }
-            }
-        }
-    }},
-    {"query": {
-        "nested" : {
-            "path": "results",
-            "query": {
-                "nested" : {
-                    "path": "results.items",
-                    "query":{
-                        "nested" : {
-                            "path": "results.items.alternatives",
-                            "filter": {
-                              "bool": {
-                                "must": {
-                                    "match" : {"results.items.alternatives.content" : search_str}
-                                }
-                              }
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
-    }}
-    ]
-    ids = search(elastic_object, search_object[index])
-    # ids = search(elastic_object, json.dumps(search_object))
-
-    # return ids['hits']['hits'][0]['_source']['results']['transcripts'][0]['transcript']
-    return ids['hits']['hits'][0]['_source']['results']['items']
-
-
-def store_record(elastic_object, record, index_name='podcast'):
+def store_record_transcribe(elastic_object, record, doc_type='records', index_name='podcast'):
     try:
-        outcome = elastic_object.index(index=index_name, doc_type='records', body=record)
+        outcome = elastic_object.index(index=index_name, doc_type=doc_type, body=record)
     except Exception as ex:
         print('Error in indexing data')
         print(str(ex))
@@ -136,72 +140,15 @@ def read_transcript_from_file():
     return tscribe_json['results']['transcripts'][0]['transcript']
 
 
-def create_index_aws(es_object, index_name='podcast'):
+def create_index_aws(es_object, index_name):
     created = False
     # index settings
-    settings = {
-        "settings": {
-            "number_of_shards": 1,
-            "number_of_replicas": 0
-        },
-        "mappings": {
-            "records": {
-                "dynamic": "strict",
-                "properties": {
-                    "jobName": {
-                        "type": "text"
-                    },
-                    "accountId": {
-                        "type": "text"
-                    },
-                    "results": {
-                        "type": "nested",
-                        "properties": {
-                            "transcripts": {
-                                "type": "nested",
-                                "properties": {
-                                    "transcript": {
-                                        "type": "text"
-                                    }
-                                }
-                            },
-                            "items": {
-                                "type": "nested",
-                                "dynamic": "true",
-                                "properties": {
-                                    "start_time": {
-                                        "type": "float"
-                                    },
-                                    "end_time": {
-                                        "type": "float"
-                                    },
-                                    "alternatives": {
-                                        "type": "nested",
-                                        "properties": {
-                                            "confidence": {
-                                                "type": "float"
-                                            },
-                                            "content": {
-                                                "type": "text"
-                                            },
-                                        },
-                                    }
-                                }
-                            },
-                        }
-                    },
-                    "status": {
-                        "type": "text"
-                    },
-                }
-            }
-        }
-    }
+    settings = WrappupStructure
 
     try:
         if not es_object.indices.exists(index_name):
             # Ignore 400 means to ignore "Index Already Exist" error.
-            es_object.indices.create(index=index_name, ignore=400, body=settings)
+            es_object.indices.create(index=index_name,  body=settings)
             print('Created Index')
         created = True
     except Exception as ex:
@@ -210,20 +157,77 @@ def create_index_aws(es_object, index_name='podcast'):
         return created
 
 
+def read_record_wrappup(elastic_object, search_str, index=0):
+    search_object = [
+    {"size": 100,
+     "query": {
+        "nested" : {
+            "path": "alternatives",
+            "query": {
+              "bool": {
+                "must": {
+                    "match" : {"alternatives.content" : search_str}
+                    }
+                  }
+                }
+            }
+    }}]
+    ids = search(elastic_object, search_object[index], 'wrappup')
+
+    return [source['_source'] for source in ids['hits']['hits']]
+
+
+def find_best_interval(es_obj, search_str, interval=15):
+    res = read_record_wrappup(es_obj, index=0, search_str=search_str)
+
+    # # res = transcribeJSON['results']['transcripts'][0]['transcript']
+    res_words = []
+    r_words = {}
+    max_nb = None
+    for r in res:
+        word = r['alternatives'][0]['content']
+        for k in res:
+            kword = k['alternatives'][0]['content']
+            if word != kword and abs(float(r['start_time']) - float(k['start_time'])) < interval:
+                if 'nb' in r:
+                    r['nb'] = r['nb'] + 1
+                else:
+                    r['nb'] = 1
+
+        res_words.append(r)
+        if max_nb is None or ('nb' in r and max_nb['nb'] < r['nb']):
+            max_nb = r
+
+        word = r['alternatives'][0]['content']
+        if word not in r_words:
+            r_words[word] = 1
+        else:
+            r_words[word] = r_words[word] + 1
+    max_nb['start_time'] = float(max_nb['start_time']) - interval
+    max_nb['end_time'] = float(max_nb['end_time']) + interval
+
+    return max_nb
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.ERROR)
 
     es_obj = connect_elasticsearch()
-    # create_index_aws(es_obj)
-    #
-    # with open(File, 'rb') as f:
-    #     transcribeJSON = json.load(f)
-    #
-    # # Save your job on ES index
-    # store_record(es_obj, transcribeJSON)
+    # create_index_aws(es_obj, index_name='podcast', settings=TranscribeStructure)
+    create_index_aws(es_obj, index_name='wrappup')
 
-    search_str = "Hello"
+    with open(File, 'rb') as f:
+        transcribeJSON = json.load(f)
 
-    res = read_record(es_obj, 2, search_str)
-    # res = transcribeJSON['results']['transcripts'][0]['transcript']
-    print(res)
+    # Save your job on ES index
+    for item in transcribeJSON['results']['items']:
+        store_record_transcribe(es_obj, item, index_name='wrappup', doc_type="items")
+
+    # Topic example from analyze module
+    search_str = ['network see idea might paper work net new effect abl', 'well effect confid way think build network idea comput vision']
+    interval = 15  # 15 sec
+
+    for sstr in search_str:
+        max_nb = find_best_interval(es_obj, sstr, interval=15)
+
+        print(max_nb)
