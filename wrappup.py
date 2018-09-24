@@ -15,9 +15,10 @@ import json
 from .elasticsearch.es_index import (
     connect_elasticsearch,
     create_index_aws,
-    store_record,
-    read_record
+    store_record_transcribe,
+    find_best_interval
 )
+from .elasticsearch.es_index_structures import read_record_transcribe
 from .transcribe.transcribe_job import (
     transcribe_start_job,
     job_name,
@@ -43,7 +44,7 @@ if __name__ == '__main__':
 
     ''' Part 1 Speech To Text '''
     es_obj = connect_elasticsearch()
-    create_index_aws(es_obj)
+    create_index_aws(es_obj, index_name='wrappup')
 
     TranscriptionJob = transcribe_start_job(job_name, job_uri)
     TranscriptFileUri = TranscriptionJob['TranscriptionJob']['Transcript']['TranscriptFileUri']
@@ -53,7 +54,9 @@ if __name__ == '__main__':
     # transcribeJSON = aws_parse_json(transcribeJSON)
 
     # Save your job to ES index
-    store_record(es_obj, transcribeJSON)
+    # store_record_transcribe(es_obj, transcribeJSON)
+    for item in transcribeJSON['results']['items']:
+        store_record_transcribe(es_obj, item, index_name='wrappup', doc_type="items")
 
     ''' Part 2 Vocabulary (uniqueness of word, frequency and relevance) '''
     input_text = transcribeJSON['results']['transcripts'][0]['transcript']
@@ -64,7 +67,7 @@ if __name__ == '__main__':
     # Topic modeling using Latent Dirichlet Allocation
     topics = lda_contributing_words(input_text, num_topics=2, num_words=10)
 
-    ''' !!! NOT READY YET !!!
+    '''
     Part 3 Create clusters of the important highlights of the discussion
     with their corresponding timestamps (start & stop time)
     '''
@@ -73,6 +76,6 @@ if __name__ == '__main__':
         """
         Here we have items with word coincidence time period
         """
-        # items = read_record(es_obj, 2, topic)
+        items = find_best_interval(es_obj, topic, interval=15)
         print(topic)
 
