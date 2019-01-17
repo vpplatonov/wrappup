@@ -132,4 +132,4 @@ best time for topic ( 30 sec speech )
 
 ### The audio should also have the ability to be searched from the data stored in the elastic search index.
 If you can make the search understand intent of the query, for eg “Tell me something about marketing in this conversation”,
-in essence looking for moments in the audio where marketing was said, it helps you get a higher score for the hack challenge.
+in essence looking for moments in the audio where marketing was said
