@@ -24,7 +24,7 @@ lxml==4.2.5
 more-itertools==4.3.0
 mysqlclient==1.3.13
 nltk==3.3
-numpy==1.15.1
+numpy==1.22.0
 Pattern==3.6
 pdfminer.six==20170720
 portend==2.3
